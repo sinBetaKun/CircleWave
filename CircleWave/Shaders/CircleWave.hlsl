@@ -9,7 +9,7 @@ cbuffer constants : register(b0)
     float strd : packoffset(c0.w);
     float x : packoffset(c1.x);
     float y : packoffset(c1.y);
-    bool mode : packoffset(c1.z);
+    int mode : packoffset(c1.z);
     float time : packoffset(c1.w);
 };
 
@@ -34,7 +34,7 @@ float4 main(
 	float radius = length(posScene.xy - float2(x, y));
     float offset = time / phase * Tau;
 	float t = amp * ((radius < strd)
-        ? (mode ? 0 : sin(strd / wlen - time*10))
+        ? (mode == 0 ? 0 : sin(strd / wlen - time*10))
         : sin(radius / wlen - offset)) - (mode ? sin(strd / wlen - offset) : 0);
 	float2 center = uv0.xy - (posScene.xy - float2(x, y)) * uv0.zw;
 	float2 uv = center + rotate(uv0.xy - center, t);

@@ -55,11 +55,11 @@ namespace CircleWave.VideoEffect
             int fps = effectDescription.FPS;
 
             double amp = item.Amp.GetValue(frame, length, fps);
-            double wlen = item.Amp.GetValue(frame, length, fps);
-            double phase = item.Amp.GetValue(frame, length, fps);
-            double strd = item.Amp.GetValue(frame, length, fps);
-            double x = item.Amp.GetValue(frame, length, fps);
-            double y = item.Amp.GetValue(frame, length, fps);
+            double wlen = item.Wlen.GetValue(frame, length, fps);
+            double phase = item.Phase.GetValue(frame, length, fps);
+            double strd = item.Strd.GetValue(frame, length, fps);
+            double x = item.X.GetValue(frame, length, fps);
+            double y = item.Y.GetValue(frame, length, fps);
             bool mode = item.Mode;
             double time = (double)frame / fps;
 
@@ -87,7 +87,7 @@ namespace CircleWave.VideoEffect
                 effect.Strd = (float)strd;
                 effect.X = (float)x;
                 effect.Y = (float)y;
-                effect.Mode = mode;
+                effect.Mode = mode ? 1 : 0;
                 effect.Time = (float)time;
 
                 this.amp = amp;

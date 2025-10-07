@@ -44,10 +44,10 @@ namespace CircleWave.VideoEffect
             get => GetFloatValue((int)EffectImpl.Properties.Y);
         }
         
-        public bool Mode
+        public int Mode
         {
             set => SetValue((int)EffectImpl.Properties.Mode, value);
-            get => GetBoolValue((int)EffectImpl.Properties.Mode);
+            get => GetIntValue((int)EffectImpl.Properties.Mode);
         }
         
         public float Time
@@ -97,7 +97,7 @@ namespace CircleWave.VideoEffect
 
             public float Strd
             {
-                get => constantBuffer.Phase;
+                get => constantBuffer.Strd;
                 set
                 {
                     constantBuffer.Strd = value;
@@ -125,7 +125,7 @@ namespace CircleWave.VideoEffect
                 }
             }
 
-            public bool Mode
+            public int Mode
             {
                 get => constantBuffer.Mode;
                 set
@@ -188,7 +188,7 @@ namespace CircleWave.VideoEffect
                 public float Strd;
                 public float X;
                 public float Y;
-                public bool Mode;
+                public int Mode;
                 public float Time;
             }
 
