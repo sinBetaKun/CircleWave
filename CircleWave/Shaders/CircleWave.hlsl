@@ -8,10 +8,11 @@ cbuffer constants : register(b0)
     float phase : packoffset(c0.z);
     float offset : packoffset(c0.w);
     float strd : packoffset(c1.x);
-    float x : packoffset(c1.y);
-    float y : packoffset(c1.z);
-    bool mode : packoffset(c1.w);
-    float time : packoffset(c2.x);
+    float cmpl : packoffset(c1.y);
+    float x : packoffset(c1.z);
+    float y : packoffset(c1.w);
+    bool mode : packoffset(c2.x);
+    float time : packoffset(c2.y);
 };
 
 float2 rotate(float2 p, float angle)
@@ -26,6 +27,15 @@ float2 rotate(float2 p, float angle)
 
 static const float PI = 3.14159265f;
 
+float completion(float x)
+{
+    return (x < 0)
+            ? 0
+            : (x > 1)
+                ? 1
+                : (-cos(x * PI) / 2 + 0.5);
+}
+
 float4 main(
     float4 pos      : SV_POSITION,
     float4 posScene : SCENE_POSITION,
@@ -34,10 +44,11 @@ float4 main(
 {
 	float radius = length(posScene.xy - float2(x, y));
     float offset2 = (time + offset) / phase * 2 * PI;
+    float sub = radius - strd;
     float t = amp / 180 * PI * (
-        (radius < strd)
+        (sub < 0)
             ? (mode ? sin(offset2) : 0)
-            : (sin((-(radius - strd) / wlen * 2 * PI) + offset2) - (mode ? 0 : sin(offset2))));
+            : ((sin((-sub / wlen * 2 * PI) + offset2) - (mode ? 0 : sin(offset2)))) * ((cmpl > 0) ? completion(sub / cmpl) : 1));
 	float2 center = uv0.xy - (posScene.xy - float2(x, y)) * uv0.zw;
 	float2 uv = center + rotate(uv0.xy - center, t);
     float4 color = (uv.x < 0 || uv.x > 1) && (uv.y < 0 || uv.y > 1) ? float4(0, 0, 0, 0) : InputTexture.Sample(InputSampler, uv.xy);

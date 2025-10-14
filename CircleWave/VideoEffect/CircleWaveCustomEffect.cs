@@ -39,6 +39,12 @@ namespace CircleWave.VideoEffect
             get => GetFloatValue((int)EffectImpl.Properties.Strd);
         }
         
+        public float Cmpl
+        {
+            set => SetValue((int)EffectImpl.Properties.Cmpl, value);
+            get => GetFloatValue((int)EffectImpl.Properties.Cmpl);
+        }
+        
         public float X
         {
             set => SetValue((int)EffectImpl.Properties.X, value);
@@ -123,6 +129,17 @@ namespace CircleWave.VideoEffect
                 set
                 {
                     constantBuffer.Strd = value;
+                    UpdateConstants();
+                }
+            }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.Cmpl)]
+            public float Cmpl
+            {
+                get => constantBuffer.Cmpl;
+                set
+                {
+                    constantBuffer.Cmpl = value;
                     UpdateConstants();
                 }
             }
@@ -322,6 +339,7 @@ namespace CircleWave.VideoEffect
                 public float Phase;
                 public float Offset;
                 public float Strd;
+                public float Cmpl;
                 public float X;
                 public float Y;
                 public bool Mode;
@@ -335,10 +353,11 @@ namespace CircleWave.VideoEffect
                 Phase = 2,
                 Offset = 3,
                 Strd = 4,
-                X = 5,
-                Y = 6,
-                Mode = 7,
-                Time = 8,
+                Cmpl = 5,
+                X = 6,
+                Y = 7,
+                Mode = 8,
+                Time = 9,
             }
         }
     }
