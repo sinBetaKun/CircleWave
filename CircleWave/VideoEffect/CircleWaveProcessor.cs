@@ -10,7 +10,7 @@ namespace CircleWave.VideoEffect
         private readonly CircleWave item;
         private bool isFirst = true;
         private bool isEnable = false;
-        private double amp, wlen, phase, offset, strd, x, y, time;
+        private double amp, wlen, phase, speed, offset, strd, cmpl, x, y, time;
         private bool mode;
 
         private readonly CircleWaveCustomEffect? effect;
@@ -59,8 +59,10 @@ namespace CircleWave.VideoEffect
             double amp = fl.GetValue(item.Amp, fps);
             double wlen = fl.GetValue(item.Wlen, fps);
             double phase = fl.GetValue(item.Phase, fps);
+            double speed = fl.GetValue(item.Speed, fps);
             double offset = fl.GetValue(item.Offset, fps);
             double strd = fl.GetValue(item.Strd, fps);
+            double cmpl = fl.GetValue(item.Cmpl, fps);
             double x = fl.GetValue(item.X, fps);
             double y = fl.GetValue(item.Y, fps);
             bool mode = item.Mode;
@@ -76,8 +78,10 @@ namespace CircleWave.VideoEffect
                 || this.amp != amp
                 || this.wlen != wlen
                 || this.phase != phase
+                || this.speed != speed
                 || this.offset != offset
                 || this.strd != strd
+                || this.cmpl != cmpl
                 || this.x != x
                 || this.y != y
                 || this.mode != mode
@@ -87,19 +91,22 @@ namespace CircleWave.VideoEffect
 
                 effect.Amp = (float)amp;
                 effect.Wlen = (float)wlen;
-                effect.Phase = (float)phase;
+                effect.Phase = (float)(phase == 0 ? 1 : phase);
                 effect.Offset = (float)offset;
                 effect.Strd = (float)strd;
+                effect.Cmpl = (float)cmpl;
                 effect.X = (float)x;
                 effect.Y = (float)y;
                 effect.Mode = mode;
-                effect.Time = (float)time;
+                effect.Time = (float)(phase == 0 ? 0 : time * speed / 100);
 
                 this.amp = amp;
                 this.wlen = wlen;
                 this.phase = phase;
+                this.speed = speed;
                 this.offset = offset;
                 this.strd = strd;
+                this.cmpl = cmpl;
                 this.x = x;
                 this.y = y;
                 this.mode = mode;
