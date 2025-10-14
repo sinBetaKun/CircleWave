@@ -1,4 +1,5 @@
-﻿using Vortice.Direct2D1;
+﻿using System.Numerics;
+using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
@@ -9,7 +10,7 @@ namespace CircleWave.VideoEffect
         private readonly CircleWave item;
         private bool isFirst = true;
         private bool isEnable = false;
-        private double amp, wlen, phase, strd, x, y, time;
+        private double amp, wlen, phase, offset, strd, x, y, time;
         private bool mode;
 
         private readonly CircleWaveCustomEffect? effect;
@@ -53,13 +54,15 @@ namespace CircleWave.VideoEffect
             int frame = effectDescription.ItemPosition.Frame;
             int length = effectDescription.ItemDuration.Frame;
             int fps = effectDescription.FPS;
+            FrameAndLength fl = new(frame, length);
 
-            double amp = item.Amp.GetValue(frame, length, fps);
-            double wlen = item.Wlen.GetValue(frame, length, fps);
-            double phase = item.Phase.GetValue(frame, length, fps);
-            double strd = item.Strd.GetValue(frame, length, fps);
-            double x = item.X.GetValue(frame, length, fps);
-            double y = item.Y.GetValue(frame, length, fps);
+            double amp = fl.GetValue(item.Amp, fps);
+            double wlen = fl.GetValue(item.Wlen, fps);
+            double phase = fl.GetValue(item.Phase, fps);
+            double offset = fl.GetValue(item.Offset, fps);
+            double strd = fl.GetValue(item.Strd, fps);
+            double x = fl.GetValue(item.X, fps);
+            double y = fl.GetValue(item.Y, fps);
             bool mode = item.Mode;
             double time = (double)frame / fps;
 
@@ -73,6 +76,7 @@ namespace CircleWave.VideoEffect
                 || this.amp != amp
                 || this.wlen != wlen
                 || this.phase != phase
+                || this.offset != offset
                 || this.strd != strd
                 || this.x != x
                 || this.y != y
@@ -84,15 +88,17 @@ namespace CircleWave.VideoEffect
                 effect.Amp = (float)amp;
                 effect.Wlen = (float)wlen;
                 effect.Phase = (float)phase;
+                effect.Offset = (float)offset;
                 effect.Strd = (float)strd;
                 effect.X = (float)x;
                 effect.Y = (float)y;
-                effect.Mode = mode ? 1 : 0;
+                effect.Mode = mode;
                 effect.Time = (float)time;
 
                 this.amp = amp;
                 this.wlen = wlen;
                 this.phase = phase;
+                this.offset = offset;
                 this.strd = strd;
                 this.x = x;
                 this.y = y;
@@ -102,7 +108,17 @@ namespace CircleWave.VideoEffect
                 isFirst = false;
             }
 
-            return effectDescription.DrawDescription;
+            return effectDescription.DrawDescription with
+            {
+                Controllers = [
+                    new VideoEffectController(item, [
+                        new ControllerPoint(
+                            new Vector3((float)x, (float)y, 0),
+                            (a) => {
+                                item.X.AddToEachValues(a.Delta.X);
+                                item.Y.AddToEachValues(a.Delta.Y);
+                            })])]
+            };
         }
 
         public void Dispose()

@@ -6,11 +6,12 @@ cbuffer constants : register(b0)
     float amp : packoffset(c0.x);
     float wlen : packoffset(c0.y);
     float phase : packoffset(c0.z);
-    float strd : packoffset(c0.w);
-    float x : packoffset(c1.x);
-    float y : packoffset(c1.y);
-    int mode : packoffset(c1.z);
-    float time : packoffset(c1.w);
+    float offset : packoffset(c0.w);
+    float strd : packoffset(c1.x);
+    float x : packoffset(c1.y);
+    float y : packoffset(c1.z);
+    bool mode : packoffset(c1.w);
+    float time : packoffset(c2.x);
 };
 
 float2 rotate(float2 p, float angle)
@@ -23,7 +24,7 @@ float2 rotate(float2 p, float angle)
     );
 }
 
-static const float Tau = 3.14159265f * 2;
+static const float PI = 3.14159265f;
 
 float4 main(
     float4 pos      : SV_POSITION,
@@ -32,16 +33,19 @@ float4 main(
 ) : SV_Target
 {
 	float radius = length(posScene.xy - float2(x, y));
-    float offset = time / phase * Tau;
-	float t = amp * ((radius < strd)
-        ? (mode == 0 ? 0 : sin(strd / wlen - time*10))
-        : sin(radius / wlen - offset)) - (mode ? sin(strd / wlen - offset) : 0);
+    float offset2 = (time + offset) / phase * 2 * PI;
+    float t = amp / 180 * PI * (
+        (radius < strd)
+            ? (mode ? sin(offset2) : 0)
+            : (sin((-(radius - strd) / wlen * 2 * PI) + offset2) - (mode ? 0 : sin(offset2))));
 	float2 center = uv0.xy - (posScene.xy - float2(x, y)) * uv0.zw;
 	float2 uv = center + rotate(uv0.xy - center, t);
-	float4 color = InputTexture.Sample(InputSampler, uv.xy);
+    float4 color = (uv.x < 0 || uv.x > 1) && (uv.y < 0 || uv.y > 1) ? float4(0, 0, 0, 0) : InputTexture.Sample(InputSampler, uv.xy);
 	return color;
 }
 
-// コマンド：
-// cd C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64
-// fxc /T ps_4_1 /E main "C:\Users\瀬井 玄\source\repos\CircleWave\CircleWave\Shaders\CircleWave.hlsl" /Fo "C:\Users\瀬井 玄\source\repos\CircleWave\CircleWave\Shaders\CircleWave.cso"
+/*
+コマンド：
+cd C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64
+fxc /T ps_4_1 /E main "C:\Users\瀬井 玄\source\repos\CircleWave\CircleWave\Shaders\CircleWave.hlsl" /Fo "C:\Users\瀬井 玄\source\repos\CircleWave\CircleWave\Shaders\CircleWave.cso"
+*/ 
