@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
@@ -66,6 +61,6 @@ namespace CircleWave.VideoEffect
             return new CircleWaveProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [Amp, Wlen, Phase, Cmpl, Offset, Strd, X, Y];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Amp, Wlen, Phase, Speed, Offset, Strd, Cmpl, X, Y];
     }
 }
