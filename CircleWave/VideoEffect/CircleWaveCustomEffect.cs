@@ -211,7 +211,7 @@ namespace CircleWave.VideoEffect
             {
                 outputOpaqueSubRect = default;
 
-                Vortice.RawRect input = inputRects[0];
+                RawRect input = inputRects[0];
 
                 RawRect[] ranges = [
                     CalcRange(input.Left, input.Top),
@@ -235,7 +235,7 @@ namespace CircleWave.VideoEffect
             /// </summary>
             /// <param name="outputRect">出力画像の範囲。最適化のため、出力画像の範囲がそのまま渡されるわけではなく、分割されることもある。</param>
             /// <param name="inputRects">出力画像を生成するために入力する必要のある入力画像の範囲。</param>
-            public override void MapOutputRectToInputRects(Vortice.RawRect outputRect, Vortice.RawRect[] inputRects)
+            public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
                 var radius =
                     new[]
@@ -254,7 +254,7 @@ namespace CircleWave.VideoEffect
 
             private RawRect CalcRange(int x, int y)
             {
-                float dx = x - X;
+                float dx = x - X; 
                 float dy = y - Y;
                 double t = Math.Atan2(dy, dx);
                 double maxT_x, minT_x, maxT_y, minT_y;
@@ -275,14 +275,14 @@ namespace CircleWave.VideoEffect
                 else
                 {
                     if (t - dt < 0)
-                        minT_x = 0;
+                        maxT_x = 0;
                     else
-                        minT_x = t - dt;
+                        maxT_x = t - dt;
 
                     if (t + dt > Math.PI)
-                        maxT_x = Math.PI;
+                        minT_x = Math.PI;
                     else
-                        maxT_x = t + dt;
+                        minT_x = t + dt;
                 }
 
                 if (t < -Math.PI / 2)
