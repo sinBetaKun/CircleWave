@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CircleWave.VideoEffect.Parameter;
+using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
@@ -12,46 +13,110 @@ namespace CircleWave.VideoEffect
     {
         public override string Label => "波打ち（極座標）";
 
-        [Display(Name = "振幅", Description = "波打つ角度")]
-        [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Amp { get; } = new Animation(10, -360, 360);
+        [Display(Name = "波の種類")]
+        [EnumComboBox]
+        public WaveType WaveType { get => _waveType; set => Set(ref _waveType, value); }
+        private WaveType _waveType = WaveType.Circle;
 
-        [Display(Name = "波長", Description = "波長")]
-        [AnimationSlider("F1", "px", 0, 500)]
-        public Animation Wlen { get; } = new Animation(400, 0, 100000);
+        [Display(AutoGenerateField = true)]
+        public CircleWaveArgBase CircleWaveArg { get => _circleWaveArg; set => Set(ref _circleWaveArg, value); }
+        private CircleWaveArgBase _circleWaveArg = new CircleWaveParameter();
 
-        [Display(Name = "周期", Description = "周期")]
-        [AnimationSlider("F2", "秒", -1, 1)]
-        public Animation Phase { get; } = new Animation(1, -100000, 100000);
+        public Animation Amp
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.AmpAngle.CopyFrom(value);
+            }
+        }
 
-        [Display(Name = "再生速度", Description = "再生速度")]
-        [AnimationSlider("F1", "%", -200, 200)]
-        public Animation Speed { get; } = new Animation(100, -100000, 100000);
+        public Animation Wlen
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.Wlen.CopyFrom(value);
+            }
+        }
 
-        [Display(Name = "再生位置", Description = "再生位置")]
-        [AnimationSlider("F2", "秒", -1, 1)]
-        public Animation Offset { get; } = new Animation(0, -100000, 100000);
+        public Animation Phase
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.Phase.CopyFrom(value);
+            }
+        }
 
-        [Display(Name = "固定部の半径", Description = "湾曲させない部分の半径")]
-        [AnimationSlider("F1", "px", 0, 500)]
-        public Animation Strd { get; } = new Animation(0, 0, 100000);
+        public Animation Speed
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.Speed.CopyFrom(value);
+            }
+        }
 
-        [Display(Name = "境界の補完", Description = "湾曲させない部分の半径")]
-        [AnimationSlider("F1", "px", 0, 500)]
-        public Animation Cmpl { get; } = new Animation(0, 0, 100000);
+        public Animation Offset
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.Offset.CopyFrom(value);
+            }
+        }
 
-        [Display(Name = "X", Description = "中心のX座標")]
-        [AnimationSlider("F1", "px", -500, 500)]
-        public Animation X { get; } = new Animation(0, -100000, 100000);
+        public Animation Strd
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.Strd.CopyFrom(value);
+            }
+        }
 
-        [Display(Name = "Y", Description = "中心のY座標")]
-        [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Y { get; } = new Animation(0, -100000, 100000);
+        public Animation Cmpl
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.Cmpl.CopyFrom(value);
+            }
+        }
 
-        [Display(Name = "固定部の回転", Description = "固定部の回転")]
-        [ToggleSlider]
-        public bool Mode { get => mode; set => Set(ref mode, value); }
-        private bool mode = false;
+        public Animation X
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.X.CopyFrom(value);
+            }
+        }
+
+        public Animation Y
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.Y.CopyFrom(value);
+            }
+        }
+
+        public bool Mode
+        {
+            set
+            {
+                if (CircleWaveArg is CircleWaveParameter cp)
+                    cp.Mode = value;
+            }
+        }
+
+        public override ValueTask EndEditAsync()
+        {
+            CircleWaveArg = WaveType.Convert(CircleWaveArg);
+            return base.EndEditAsync();
+        }
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
             => [];
@@ -61,6 +126,6 @@ namespace CircleWave.VideoEffect
             return new CircleWaveProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [Amp, Wlen, Phase, Speed, Offset, Strd, Cmpl, X, Y];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [CircleWaveArg];
     }
 }
