@@ -4,16 +4,18 @@
         <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<FileVersion>1.0.0.0</FileVersion>
+		<FileVersion>1.3.0.0</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
       <None Remove="Shaders\CircleWave.cso" />
+      <None Remove="Shaders\CircleWave2.cso" />
       <None Remove="Shaders\RadialWave.cso" />
     </ItemGroup>
 
     <ItemGroup>
       <EmbeddedResource Include="Shaders\CircleWave.cso" />
+      <EmbeddedResource Include="Shaders\CircleWave2.cso" />
       <EmbeddedResource Include="Shaders\RadialWave.cso" />
     </ItemGroup>
 
@@ -43,6 +45,6 @@
 
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="mkdir &quot;$(YMM4DirPath)user\plugin\$(ProjectName)&quot; &gt; NUL 2&gt;&amp;1&#xD;&#xA;copy &quot;$(TargetPath)&quot; &quot;E:\sinBeta\app\YukkuriMovieMaker_v4\user\plugin\$(ProjectName)\&quot;" />
+		<Exec Command="mkdir &quot;$(YMM4DirPath)user\plugin\$(ProjectName)&quot; &gt; NUL 2&gt;&amp;1&#xD;&#xA;copy &quot;$(TargetPath)&quot; &quot;D:\sinBeta\app\YukkuriMovieMaker_v4\user\plugin\$(ProjectName)\&quot;" />
 	</Target>
 </Project>

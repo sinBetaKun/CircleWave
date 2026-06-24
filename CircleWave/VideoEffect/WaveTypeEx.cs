@@ -10,6 +10,7 @@ namespace CircleWave.VideoEffect
             CircleWaveArgBase param = type switch
             {
                 WaveType.Circle => new CircleWaveParameter(store),
+                WaveType.Circle2 => new CircleWave2Parameter(store),
                 WaveType.Radial => new RadialWaveParameter(store),
                 _ => throw new NotSupportedException()
             };

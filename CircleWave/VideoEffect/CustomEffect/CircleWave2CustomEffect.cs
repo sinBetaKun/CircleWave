@@ -2,75 +2,58 @@
 using System.Runtime.InteropServices;
 using Vortice;
 using Vortice.Direct2D1;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
-namespace CircleWave.VideoEffect
+namespace CircleWave.VideoEffect.CustomEffect
 {
-    internal class CircleWaveCustomEffect : D2D1CustomShaderEffectBase
+    internal class CircleWave2CustomEffect : D2D1CustomShaderEffectBase
     {
         public float Amp
         {
             set => SetValue((int)EffectImpl.Properties.Amp, value);
             get => GetFloatValue((int)EffectImpl.Properties.Amp);
         }
-        
+
         public float Wlen
         {
             set => SetValue((int)EffectImpl.Properties.Wlen, value);
             get => GetFloatValue((int)EffectImpl.Properties.Wlen);
         }
-        
-        public float Phase
-        {
-            set => SetValue((int)EffectImpl.Properties.Phase, value);
-            get => GetFloatValue((int)EffectImpl.Properties.Phase);
-        }
-        
+
         public float Offset
         {
             set => SetValue((int)EffectImpl.Properties.Offset, value);
             get => GetFloatValue((int)EffectImpl.Properties.Offset);
         }
-        
+
         public float Strd
         {
             set => SetValue((int)EffectImpl.Properties.Strd, value);
             get => GetFloatValue((int)EffectImpl.Properties.Strd);
         }
-        
-        public float Cmpl
-        {
-            set => SetValue((int)EffectImpl.Properties.Cmpl, value);
-            get => GetFloatValue((int)EffectImpl.Properties.Cmpl);
-        }
-        
+
         public float X
         {
             set => SetValue((int)EffectImpl.Properties.X, value);
             get => GetFloatValue((int)EffectImpl.Properties.X);
         }
-        
+
         public float Y
         {
             set => SetValue((int)EffectImpl.Properties.Y, value);
             get => GetFloatValue((int)EffectImpl.Properties.Y);
         }
-        
-        public bool Mode
+
+        public float E
         {
-            set => SetValue((int)EffectImpl.Properties.Mode, value);
-            get => GetBoolValue((int)EffectImpl.Properties.Mode);
-        }
-        
-        public float Time
-        {
-            set => SetValue((int)EffectImpl.Properties.Time, value);
-            get => GetFloatValue((int)EffectImpl.Properties.Time);
+            set => SetValue((int)EffectImpl.Properties.E, value);
+            get => GetFloatValue((int)EffectImpl.Properties.E);
         }
 
-        public CircleWaveCustomEffect(IGraphicsDevicesAndContext devices) : base(Create<EffectImpl>(devices))
-        {   
+        public CircleWave2CustomEffect(IGraphicsDevicesAndContext devices) : base(Create<EffectImpl>(devices))
+        {
         }
 
         [CustomEffect(1)]
@@ -100,17 +83,6 @@ namespace CircleWave.VideoEffect
                 }
             }
 
-            [CustomEffectProperty(PropertyType.Float, (int)Properties.Phase)]
-            public float Phase
-            {
-                get => constantBuffer.Phase;
-                set
-                {
-                    constantBuffer.Phase = value;
-                    UpdateConstants();
-                }
-            }
-
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Offset)]
             public float Offset
             {
@@ -129,17 +101,6 @@ namespace CircleWave.VideoEffect
                 set
                 {
                     constantBuffer.Strd = value;
-                    UpdateConstants();
-                }
-            }
-
-            [CustomEffectProperty(PropertyType.Float, (int)Properties.Cmpl)]
-            public float Cmpl
-            {
-                get => constantBuffer.Cmpl;
-                set
-                {
-                    constantBuffer.Cmpl = value;
                     UpdateConstants();
                 }
             }
@@ -166,29 +127,18 @@ namespace CircleWave.VideoEffect
                 }
             }
 
-            [CustomEffectProperty(PropertyType.Bool, (int)Properties.Mode)]
-            public bool Mode
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.E)]
+            public float E
             {
-                get => constantBuffer.Mode;
+                get => constantBuffer.E;
                 set
                 {
-                    constantBuffer.Mode = value;
+                    constantBuffer.E = value;
                     UpdateConstants();
                 }
             }
 
-            [CustomEffectProperty(PropertyType.Float, (int)Properties.Time)]
-            public float Time
-            {
-                get => constantBuffer.Time;
-                set
-                {
-                    constantBuffer.Time = value;
-                    UpdateConstants();
-                }
-            }
-
-            public EffectImpl() : base(ShaderResourceLoader.GetShaderResource("CircleWave.cso")/*ここでシェーダーのbyte列を渡す*/)
+            public EffectImpl() : base(ShaderResourceLoader.GetShaderResource("CircleWave2.cso")/*ここでシェーダーのbyte列を渡す*/)
             {
             }
 
@@ -207,24 +157,55 @@ namespace CircleWave.VideoEffect
             /// <param name="inputOpaqueSubRects">入力画像の不透明な部分の範囲。最適化のため、入力画像の範囲がそのまま渡されるわけではなく、分割されることもある。</param>
             /// <param name="outputRect">入力画像をもとに計算した出力画像の範囲。</param>
             /// <param name="outputOpaqueSubRect">入力画像を元に計算した出力画像の不透明な部分</param>
-            public override void MapInputRectsToOutputRect(Vortice.RawRect[] inputRects, Vortice.RawRect[] inputOpaqueSubRects, out Vortice.RawRect outputRect, out Vortice.RawRect outputOpaqueSubRect)
+            public override void MapInputRectsToOutputRect(RawRect[] inputRects, RawRect[] inputOpaqueSubRects, out RawRect outputRect, out RawRect outputOpaqueSubRect)
             {
                 outputOpaqueSubRect = default;
 
                 RawRect input = inputRects[0];
+                var globalBounds = new Bounds();
+                object lockObj = new();
 
-                RawRect[] ranges = [
-                    CalcRange(input.Left, input.Top),
-                    CalcRange(input.Right, input.Top),
-                    CalcRange(input.Left, input.Bottom),
-                    CalcRange(input.Right, input.Bottom),
-                    ];
+                Parallel.For(
+                    input.Left,
+                    input.Right,
+                    () => new Bounds(),   // スレッドごとのBounds,
+                    (x, state, local) =>
+                    {
+                        local.Add(Transform(x, input.Top));
+                        local.Add(Transform(x, input.Bottom));
+                        return local;
+                    },
+                    local =>
+                    {
+                        lock (lockObj)
+                        {
+                            globalBounds.Merge(local);
+                        }
+                    });
+
+                Parallel.For(
+                    input.Top + 1,
+                    input.Bottom - 1,
+                    () => new Bounds(),   // スレッドごとのBounds,
+                    (y, state, local) =>
+                    {
+                        local.Add(Transform(input.Left, y));
+                        local.Add(Transform(input.Right, y));
+                        return local;
+                    },
+                    local =>
+                    {
+                        lock (lockObj)
+                        {
+                            globalBounds.Merge(local);
+                        }
+                    });
 
                 outputRect = new RawRect(
-                    ranges.Select(rc => rc.Left).Min(),
-                    ranges.Select(rc => rc.Top).Min(),
-                    ranges.Select(rc => rc.Right).Max(),
-                    ranges.Select(rc => rc.Bottom).Max());
+                    (int)MathF.Floor(globalBounds.MinX),
+                    (int)MathF.Floor(globalBounds.MinY),
+                    (int)MathF.Ceiling(globalBounds.MaxX),
+                    (int)MathF.Ceiling(globalBounds.MaxY));
             }
 
             /// <summary>
@@ -237,98 +218,113 @@ namespace CircleWave.VideoEffect
             /// <param name="inputRects">出力画像を生成するために入力する必要のある入力画像の範囲。</param>
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                var radius =
-                    new[]
+                var globalBounds = new Bounds();
+                object lockObj = new();
+
+                Parallel.For(
+                    outputRect.Left,
+                    outputRect.Right,
+                    () => new Bounds(),   // スレッドごとのBounds,
+                    (x, state, local) =>
                     {
-                        new Vector2(outputRect.Left, outputRect.Top),
-                        new Vector2(outputRect.Right, outputRect.Top),
-                        new Vector2(outputRect.Left, outputRect.Bottom),
-                        new Vector2(outputRect.Right, outputRect.Bottom)
-                    }
-                    .Select(x => x.Length())
-                    .Select(x => (int)MathF.Ceiling(x))
-                    .Max();
-                radius = Math.Min(radius, 2048);
-                inputRects[0] = new RawRect(-radius, -radius, radius, radius);
+                        local.Add(InvTransform(x, outputRect.Top));
+                        local.Add(InvTransform(x, outputRect.Bottom));
+                        return local;
+                    },
+                    local =>
+                    {
+                        lock (lockObj)
+                        {
+                            globalBounds.Merge(local);
+                        }
+                    });
+
+                Parallel.For(
+                    outputRect.Top + 1,
+                    outputRect.Bottom - 1,
+                    () => new Bounds(),   // スレッドごとのBounds,
+                    (y, state, local) =>
+                    {
+                        local.Add(InvTransform(outputRect.Left, y));
+                        local.Add(InvTransform(outputRect.Right, y));
+                        return local;
+                    },
+                    local =>
+                    {
+                        lock (lockObj)
+                        {
+                            globalBounds.Merge(local);
+                        }
+                    });
+
+                inputRects[0] = new RawRect(
+                    (int)MathF.Floor(globalBounds.MinX),
+                    (int)MathF.Floor(globalBounds.MinY),
+                    (int)MathF.Ceiling(globalBounds.MaxX),
+                    (int)MathF.Ceiling(globalBounds.MaxY));
             }
 
-            private RawRect CalcRange(int x, int y)
+            private Vector2 Transform(float x0, float y0)
             {
-                float dx = x - X; 
-                float dy = y - Y;
-                double t = Math.Atan2(dy, dx);
-                double maxT_x, minT_x, maxT_y, minT_y;
-                double dt = Math.Abs(Math.PI * Amp / (Mode ? 180 : 90));
+                float x1 = x0 - X;
+                float y1 = y0 - Y;
+                float f0 = MathF.Sqrt(x1 * x1 + y1 * y1);
+                float f1 = MathF.Max(0, f0 - Strd);
+                float f2 = f1 * Amp * MathF.Sin((Offset - MathF.Pow(f1 / Wlen + 1.0f, E)) * MathF.Tau);
+                float f3 = f2 / f0;
+                float s = MathF.Sin(-f3);
+                float c = MathF.Cos(f3); // = cos(-f3)
+                return new Vector2(X + c * x1 - s * y1, Y + s * x1 + c * y1);
+            }
 
-                if (t < 0)
+            private Vector2 InvTransform(float x0, float y0)
+            {
+                float x1 = x0 - X;
+                float y1 = y0 - Y;
+                float f0 = MathF.Sqrt(x1 * x1 + y1 * y1);
+                float f1 = MathF.Max(0, f0 - Strd);
+                float f2 = f1 * Amp * MathF.Sin((Offset - MathF.Pow(f1 / Wlen + 1.0f, E)) * MathF.Tau);
+                float f3 = f2 / f0;
+                float s = MathF.Sin(f3);
+                float c = MathF.Cos(f3);
+                return new Vector2(X + c * x1 - s * y1, Y + s * x1 + c * y1);
+            }
+
+            private struct Bounds
+            {
+                public float MinX;
+                public float MinY;
+                public float MaxX;
+                public float MaxY;
+
+                public Bounds()
                 {
-                    if (t - dt < -Math.PI)
-                        minT_x = -Math.PI;
-                    else
-                        minT_x = t - dt;
-
-                    if (t + dt > 0)
-                        maxT_x = 0;
-                    else
-                        maxT_x = t + dt;
-                }
-                else
-                {
-                    if (t - dt < 0)
-                        maxT_x = 0;
-                    else
-                        maxT_x = t - dt;
-
-                    if (t + dt > Math.PI)
-                        minT_x = Math.PI;
-                    else
-                        minT_x = t + dt;
-                }
-
-                if (t < -Math.PI / 2)
-                {
-                    if (t - dt < -Math.PI * 3 / 2)
-                        maxT_y = Math.PI / 2;
-                    else
-                        maxT_y = t - dt;
-
-                    if (t + dt > -Math.PI / 2)
-                        minT_y = -Math.PI / 2;
-                    else
-                        minT_y = t + dt;
-                }
-                else if (t > Math.PI / 2)
-                {
-                    if (t - dt < Math.PI / 2)
-                        maxT_y = Math.PI / 2;
-                    else
-                        maxT_y = t - dt;
-
-                    if (t + dt > Math.PI * 3 / 2)
-                        minT_y = -Math.PI / 2;
-                    else
-                        minT_y = t + dt;
-                }
-                else
-                {
-                    if (t - dt < -Math.PI / 2)
-                        minT_y = 0;
-                    else
-                        minT_y = t - dt;
-
-                    if (t + dt > Math.PI / 2)
-                        maxT_y = Math.PI;
-                    else
-                        maxT_y = t + dt;
+                    MinX = float.MaxValue;
+                    MinY = float.MaxValue;
+                    MaxX = float.MinValue;
+                    MaxY = float.MinValue;
                 }
 
-                double r = Math.Sqrt(dx * dx + dy * dy);
+                public void Add(Vector2 p)
+                {
+                    MinX = MathF.Min(MinX, p.X);
+                    MinY = MathF.Min(MinY, p.Y);
 
-                return new(
-                    (int)Math.Floor(X + r * Math.Cos(minT_x)),
-                    (int)Math.Floor(Y + r * Math.Sin(minT_y)),
-                    (int)Math.Ceiling(X + r * Math.Cos(maxT_x)),
-                    (int)Math.Ceiling(Y + r * Math.Sin(maxT_y)));
+                    MaxX = MathF.Max(MaxX, p.X);
+                    MaxY = MathF.Max(MaxY, p.Y);
+                }
+
+                public void Merge(Bounds other)
+                {
+                    MinX = MathF.Min(MinX, other.MinX);
+                    MinY = MathF.Min(MinY, other.MinY);
+
+                    MaxX = MathF.Max(MaxX, other.MaxX);
+                    MaxY = MathF.Max(MaxY, other.MaxY);
+                }
+
+                public readonly float Width => MaxX - MinX;
+                public readonly float Height => MaxY - MinY;
             }
 
             [StructLayout(LayoutKind.Sequential)]
@@ -336,28 +332,22 @@ namespace CircleWave.VideoEffect
             {
                 public float Amp;
                 public float Wlen;
-                public float Phase;
                 public float Offset;
                 public float Strd;
-                public float Cmpl;
                 public float X;
                 public float Y;
-                public bool Mode;
-                public float Time;
+                public float E;
             }
 
             public enum Properties
             {
                 Amp = 0,
                 Wlen = 1,
-                Phase = 2,
-                Offset = 3,
-                Strd = 4,
-                Cmpl = 5,
-                X = 6,
-                Y = 7,
-                Mode = 8,
-                Time = 9,
+                Offset = 2,
+                Strd = 3,
+                X = 4,
+                Y = 5,
+                E = 6,
             }
         }
     }

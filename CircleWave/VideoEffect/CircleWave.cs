@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace CircleWave.VideoEffect
 {
-    [VideoEffect("波打ち（極座標）", ["アニメーション"], ["渦", "spiral", "プラグイン", "plugin"])]
+    [VideoEffect("波打ち（極座標）", ["アニメーション"], ["wave", "circle", "radial", "プラグイン", "plugin"])]
     internal class CircleWave : VideoEffectBase
     {
         public override string Label => "波打ち（極座標）";
@@ -16,18 +16,24 @@ namespace CircleWave.VideoEffect
         [Display(Name = "波の種類")]
         [EnumComboBox]
         public WaveType WaveType { get => _waveType; set => Set(ref _waveType, value); }
-        private WaveType _waveType = WaveType.Circle;
+        private WaveType _waveType = WaveType.Circle2;
 
         [Display(AutoGenerateField = true)]
         public CircleWaveArgBase CircleWaveArg { get => _circleWaveArg; set => Set(ref _circleWaveArg, value); }
-        private CircleWaveArgBase _circleWaveArg = new CircleWaveParameter();
+        private CircleWaveArgBase _circleWaveArg = new CircleWave2Parameter();
 
         public Animation Amp
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.AmpAngle.CopyFrom(value);
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.AmpAngle.CopyFrom(value);
             }
         }
 
@@ -35,8 +41,14 @@ namespace CircleWave.VideoEffect
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.Wlen.CopyFrom(value);
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.Wlen.CopyFrom(value);
             }
         }
 
@@ -44,8 +56,14 @@ namespace CircleWave.VideoEffect
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.Phase.CopyFrom(value);
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.Phase.CopyFrom(value);
             }
         }
 
@@ -53,8 +71,14 @@ namespace CircleWave.VideoEffect
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.Speed.CopyFrom(value);
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.Speed.CopyFrom(value);
             }
         }
 
@@ -62,8 +86,14 @@ namespace CircleWave.VideoEffect
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.Offset.CopyFrom(value);
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.Offset.CopyFrom(value);
             }
         }
 
@@ -71,8 +101,14 @@ namespace CircleWave.VideoEffect
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.Strd.CopyFrom(value);
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.Strd.CopyFrom(value);
             }
         }
 
@@ -80,8 +116,14 @@ namespace CircleWave.VideoEffect
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.Cmpl.CopyFrom(value);
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.Cmpl.CopyFrom(value);
             }
         }
 
@@ -89,8 +131,14 @@ namespace CircleWave.VideoEffect
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.X.CopyFrom(value);
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.X.CopyFrom(value);
             }
         }
 
@@ -98,8 +146,14 @@ namespace CircleWave.VideoEffect
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.Y.CopyFrom(value);
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.Y.CopyFrom(value);
             }
         }
 
@@ -107,8 +161,14 @@ namespace CircleWave.VideoEffect
         {
             set
             {
-                if (CircleWaveArg is CircleWaveParameter cp)
-                    cp.Mode = value;
+                if (CircleWaveArg is not CircleWaveParameter)
+                {
+                    WaveType = WaveType.Circle;
+                    CircleWaveArg = new CircleWaveParameter();
+                }
+
+                var cp = (CircleWaveParameter)CircleWaveArg;
+                cp.Mode = value;
             }
         }
 

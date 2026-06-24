@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="CircleWave/CircleWave.csproj" />
+  <Project Path="CircleWave/CircleWave.csproj">
+    <BuildType Project="Release" />
+  </Project>
 </Solution>

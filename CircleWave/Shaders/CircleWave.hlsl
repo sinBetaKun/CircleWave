@@ -42,21 +42,21 @@ float4 main(
     float4 uv0 : TEXCOORD0
 ) : SV_Target
 {
-    float radius = length(posScene.xy - float2(x, y));
+    float2 _0 = posScene.xy - float2(x, y);
+    float radius = length(_0);
     float offset2 = (time + offset) / phase * 2 * PI;
     float sub = radius - strd;
-    float t = amp / 180 * PI * (
+    float t = amp * (
         (sub < 0)
             ? (mode ? sin(offset2) : 0)
             : ((sin((-sub / wlen * 2 * PI) * ((cmpl > 0) ? completion(sub / cmpl) : 1) + offset2) - (mode ? 0 : sin(offset2)))));
-    float2 center = uv0.xy - (posScene.xy - float2(x, y)) * uv0.zw;
-    float2 uv = center + rotate(uv0.xy - center, t);
-    float4 color = (uv.x < 0 || uv.x > 1) && (uv.y < 0 || uv.y > 1) ? float4(0, 0, 0, 0) : InputTexture.Sample(InputSampler, uv.xy);
-    return color;
+    float2 center = uv0.xy - _0 * uv0.zw;
+    float2 uv = center + rotate(_0, t) * uv0.zw;
+    return InputTexture.Sample(InputSampler, uv.xy);
 }
 
 /*
 コマンド：
-cd C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64
-fxc /T ps_4_1 /E main "C:\Users\瀬井 玄\source\repos\CircleWave\CircleWave\Shaders\CircleWave.hlsl" /Fo "C:\Users\瀬井 玄\source\repos\CircleWave\CircleWave\Shaders\CircleWave.cso"
+cd C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64
+fxc /T ps_4_1 /E main "C:\Users\sinbe\source\repos\CircleWave\CircleWave\Shaders\CircleWave.hlsl" /Fo "C:\Users\sinbe\source\repos\CircleWave\CircleWave\Shaders\CircleWave.cso"
 */ 

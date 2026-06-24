@@ -3,7 +3,7 @@ using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
-namespace CircleWave.VideoEffect
+namespace CircleWave.VideoEffect.CustomEffect
 {
     internal class RadialWaveCustomEffect : D2D1CustomShaderEffectBase
     {
@@ -141,10 +141,10 @@ namespace CircleWave.VideoEffect
             public override void MapOutputRectToInputRects(Vortice.RawRect outputRect, Vortice.RawRect[] inputRects)
             {
                 inputRects[0] = new(
-                    (int)Math.Floor(outputRect.Left - Math.Abs((outputRect.Left - X) * Amp / 100)),
-                    (int)Math.Floor(outputRect.Top - Math.Abs((outputRect.Top - Y) * Amp / 100)),
-                    (int)Math.Ceiling(outputRect.Right + Math.Abs((outputRect.Right - X) * Amp / 100)),
-                    (int)Math.Ceiling(outputRect.Bottom + Math.Abs((outputRect.Bottom - Y) * Amp / 100)));
+                    (int)Math.Floor(outputRect.Left - Math.Abs((outputRect.Left - X) * Amp / 50)),
+                    (int)Math.Floor(outputRect.Top - Math.Abs((outputRect.Top - Y) * Amp / 50)),
+                    (int)Math.Ceiling(outputRect.Right + Math.Abs((outputRect.Right - X) * Amp / 50)),
+                    (int)Math.Ceiling(outputRect.Bottom + Math.Abs((outputRect.Bottom - Y) * Amp / 50)));
             }
 
             [StructLayout(LayoutKind.Sequential)]
